@@ -63,7 +63,8 @@ namespace PotreeBatchConverter
         private static string GetCurrentDirectory()
         {
             var currentPath = GetCurrentPath();
-            return new Uri(Path.GetDirectoryName(currentPath)).LocalPath;
+            var directoryName = Path.GetDirectoryName(currentPath) ?? throw new InvalidOperationException();
+            return new Uri(directoryName).LocalPath;
         }
 
         private static string GetCurrentPath()

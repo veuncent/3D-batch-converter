@@ -20,7 +20,7 @@ namespace PotreeBatchConverter
                 .Where(f => f.EndsWith(".las", StringComparison.OrdinalIgnoreCase)
                             || f.EndsWith(".laz", StringComparison.OrdinalIgnoreCase)
                             || f.EndsWith(".ptx", StringComparison.OrdinalIgnoreCase)
-                            || f.EndsWith("ply, StringComparison.OrdinalIgnoreCase"));
+                            || f.EndsWith("ply", StringComparison.OrdinalIgnoreCase));
 
             foreach (var file in files)
             {

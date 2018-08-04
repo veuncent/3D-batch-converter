@@ -8,15 +8,18 @@ namespace PotreeBatchConverter
     internal class PotreeConverterService
     {
         private readonly string _currentDirectory;
+        private readonly string _logSeparator;
 
         public PotreeConverterService()
         {
             _currentDirectory = GetCurrentDirectory();
+            _logSeparator = GetLogSeparator();
+
         }
 
         public void ConvertFilesInDirectory(string inputDirectory)
         {
-            Console.WriteLine($"Reading all Potree-compatible files from {inputDirectory} and its subfolders...");
+            Console.WriteLine($"[Reading all Potree-compatible files from {inputDirectory} and its subfolders...]");
 
             var files = Directory.EnumerateFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
                 .Where(f => f.EndsWith(".las", StringComparison.OrdinalIgnoreCase)
@@ -29,13 +32,17 @@ namespace PotreeBatchConverter
                 RunProcess(file);
             }
 
-            Console.WriteLine("All done. Press the 'Any' key to exit...");
-            Console.ReadKey();
+            WriteLogSeparator();
+            Console.WriteLine($"Finished processing folder {inputDirectory}");
         }
 
         private void RunProcess(string file)
         {
-            Console.WriteLine($"Processing {file}");
+            
+
+            WriteLogSeparator();
+            Console.WriteLine($"[Processing {file}]");
+            Console.WriteLine();
 
             var startInfo = new ProcessStartInfo
             {
@@ -57,7 +64,7 @@ namespace PotreeBatchConverter
             process.BeginErrorReadLine();
             process.WaitForExit();
 
-            Console.WriteLine($"Done pocessing {file}");
+            Console.WriteLine($"[Done pocessing {file}]");
         }
 
         private static string GetCurrentDirectory()
@@ -70,6 +77,21 @@ namespace PotreeBatchConverter
         private static string GetCurrentPath()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+        }
+
+        private static string GetLogSeparator()
+        {
+            var sep = "";
+            for (var i = 0; i < Console.WindowWidth; i++)
+                sep += "=";
+            return sep;
+        }
+
+        private void WriteLogSeparator()
+        {
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine(_logSeparator);
         }
     }
 }

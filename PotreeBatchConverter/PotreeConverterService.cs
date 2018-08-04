@@ -29,17 +29,15 @@ namespace PotreeBatchConverter
 
             foreach (var file in files)
             {
-                RunProcess(file);
+                RunPotreeConverterProcess(file);
             }
 
             WriteLogSeparator();
             Console.WriteLine($"Finished processing folder {inputDirectory}");
         }
 
-        private void RunProcess(string file)
+        private void RunPotreeConverterProcess(string file)
         {
-            
-
             WriteLogSeparator();
             Console.WriteLine($"[Processing {file}]");
             Console.WriteLine();

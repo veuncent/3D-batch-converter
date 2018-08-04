@@ -34,19 +34,18 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PotreeConverterService.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="config.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\approximateTerrainHeights.json" />
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\IAU2006_XYS\IAU2006_XYS_0.json" />
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\IAU2006_XYS\IAU2006_XYS_1.json" />

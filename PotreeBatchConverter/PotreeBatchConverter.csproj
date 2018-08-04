@@ -549,6 +549,11 @@
     <Content Include="PotreeConverter\resources\page_template\libs\tween\Tween.js" />
     <Content Include="PotreeConverter\resources\page_template\libs\tween\tween.min.js" />
     <Content Include="PotreeConverter\resources\page_template\viewer_template.html" />
+  <ItemGroup>
+    <ProjectReference Include="..\DotNet.Config\DotNet.Config.csproj">
+      <Project>{B0370A9F-B245-4A91-A3DF-8BD2F3087465}</Project>
+      <Name>DotNet.Config</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

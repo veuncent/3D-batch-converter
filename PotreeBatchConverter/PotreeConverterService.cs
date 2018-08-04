@@ -24,6 +24,7 @@ namespace PotreeBatchConverter
             var files = Directory.EnumerateFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
                 .Where(f => f.EndsWith(".las", StringComparison.OrdinalIgnoreCase)
                             || f.EndsWith(".laz", StringComparison.OrdinalIgnoreCase)
+                            || f.EndsWith(".xyz", StringComparison.OrdinalIgnoreCase)
                             || f.EndsWith(".ptx", StringComparison.OrdinalIgnoreCase)
                             || f.EndsWith("ply", StringComparison.OrdinalIgnoreCase));
 

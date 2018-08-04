@@ -113,12 +113,8 @@
     <None Include="PotreeConverter\resources\page_template\libs\three.js\README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PotreeConverter\laszip.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="PotreeConverter\PotreeConverter.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="PotreeConverter\laszip.dll" />
+    <Content Include="PotreeConverter\PotreeConverter.exe" />
     <Content Include="PotreeConverter\resources\page_template\lasmap_template.html" />
     <Content Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\Textures\maki\airfield.png" />
     <Content Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\Textures\maki\airport.png" />
@@ -549,6 +545,7 @@
     <Content Include="PotreeConverter\resources\page_template\libs\tween\Tween.js" />
     <Content Include="PotreeConverter\resources\page_template\libs\tween\tween.min.js" />
     <Content Include="PotreeConverter\resources\page_template\viewer_template.html" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNet.Config\DotNet.Config.csproj">
       <Project>{B0370A9F-B245-4A91-A3DF-8BD2F3087465}</Project>
@@ -556,4 +553,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(ProjectDir)PotreeConverter" "$(TargetDir)PotreeConverter" /S /D</PostBuildEvent>
+  </PropertyGroup>
 </Project>

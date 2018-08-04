@@ -114,7 +114,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PotreeConverter\laszip.dll" />
-    <Content Include="PotreeConverter\PotreeConverter.exe" />
+    <Content Include="PotreeConverter\PotreeConverter.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PotreeConverter\resources\page_template\lasmap_template.html" />
     <Content Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\Textures\maki\airfield.png" />
     <Content Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\Textures\maki\airport.png" />

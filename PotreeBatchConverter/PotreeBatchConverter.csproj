@@ -112,9 +112,6 @@
     <None Include="PotreeConverter\resources\page_template\libs\spectrum\README.md" />
     <None Include="PotreeConverter\resources\page_template\libs\three.js\LICENSE" />
     <None Include="PotreeConverter\resources\page_template\libs\three.js\README.md" />
-    <None Include="sleep.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="PotreeConverter\laszip.dll">

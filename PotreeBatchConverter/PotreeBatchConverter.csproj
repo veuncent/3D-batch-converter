@@ -163,7 +163,9 @@
     <Content Include="Nexus_4.2\Qt5Widgets.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PotreeConverter\laszip.dll" />
+    <Content Include="PotreeConverter\laszip.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PotreeConverter\PotreeConverter.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

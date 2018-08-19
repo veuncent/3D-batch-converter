@@ -66,7 +66,7 @@ namespace PotreeBatchConverter
 
             if (!FileTypeIsSupportedByTargetSystem(targetSystem, file))
             {
-                Console.WriteLine($"File type is not supported by {_targetSystems}: [{file}]");
+                Console.WriteLine($"File type is not supported for {targetSystem} conversion: [{file}]");
                 return;
             }
 

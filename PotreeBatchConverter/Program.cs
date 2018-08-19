@@ -73,11 +73,9 @@ namespace PotreeBatchConverter
                         Console.WriteLine($"Invalid input: {input}");
                         break;
                 }
-
             } while (!isValidInput);
 
             return targetSystems;
-
         }
 
         private static string AskFileOrDirectory()

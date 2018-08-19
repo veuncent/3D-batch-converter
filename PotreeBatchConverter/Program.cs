@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace PotreeBatchConverter
@@ -10,31 +11,74 @@ namespace PotreeBatchConverter
             Console.WriteLine("Starting Potree Batch Converter...");
             Console.WriteLine(Environment.NewLine);
 
-            var converterService = new PotreeConverterService();
+            var targetSystems = AskTargetSystems();
+            var converterService = ConverterService.Create(targetSystems);
 
             var fileOrDirectory = AskFileOrDirectory();
-
+            string inputPath;
             switch (fileOrDirectory)
             {
                 case "f":
                 case "file":
-                    var inputFile = AskInputFile();
-                    converterService.ConvertFileToPotree(inputFile);
+                    inputPath = AskInputFile();
+                    converterService.ConvertFileToTargetSystems(inputPath);
                     break;
                 case "d":
                 case "directory":
-                    var inputDir = AskInputDirectory();
-                    converterService.ConvertFilesInDirectory(inputDir);
+                    inputPath = AskInputDirectory();
+                    converterService.ConvertFilesInDirectoryToTargetSystems(inputPath);
                     break;
                 default:
                     throw new ArgumentException();
             }
+
 
             Console.WriteLine(Environment.NewLine);
             Console.WriteLine("All done. Press the 'Any' key to exit...");
             Console.ReadKey();
         }
 
+        private static List<TargetSystem> AskTargetSystems()
+        {
+            Console.WriteLine("For which systems would you like to convert?");
+            var targetSystems = new List<TargetSystem>();
+
+            var isValidInput = false;
+            do
+            {
+                Console.WriteLine("Valid options are:");
+                Console.WriteLine("     'potree' (or 'p')");
+                Console.WriteLine("     'nexus' (or 'n') (this is 3d hop)");
+                Console.WriteLine("     'both' ( or 'b')");
+                var input = Console.ReadLine();
+                switch (input)
+                {
+                    case "potree":
+                    case "p":
+                        targetSystems.Add(TargetSystem.Potree);
+                        isValidInput = true;
+                        break;
+                    case "nexus":
+                    case "n":
+                        targetSystems.Add(TargetSystem.Nexus);
+                        isValidInput = true;
+                        break;
+                    case "both":
+                    case "b":
+                        targetSystems.Add(TargetSystem.Potree);
+                        targetSystems.Add(TargetSystem.Nexus);
+                        isValidInput = true;
+                        break;
+                    default:
+                        Console.WriteLine($"Invalid input: {input}");
+                        break;
+                }
+
+            } while (!isValidInput);
+
+            return targetSystems;
+
+        }
 
         private static string AskFileOrDirectory()
         {

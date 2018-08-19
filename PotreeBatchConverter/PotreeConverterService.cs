@@ -7,14 +7,12 @@ namespace PotreeBatchConverter
 {
     internal class PotreeConverterService
     {
-        private readonly string _currentDirectory;
         private readonly string _logSeparator;
+        private readonly string[] _potreeSupportedFileTypes = { ".las", ".laz", ".xyz", ".ptx", ".ply" };
 
         public PotreeConverterService()
         {
-            _currentDirectory = GetCurrentDirectory();
             _logSeparator = GetLogSeparator();
-
         }
 
         public void ConvertFilesInDirectory(string inputDirectory)
@@ -22,32 +20,48 @@ namespace PotreeBatchConverter
             Console.WriteLine($"[Reading all Potree-compatible files from {inputDirectory} and its subfolders...]");
 
             var files = Directory.EnumerateFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
-                .Where(f => f.EndsWith(".las", StringComparison.OrdinalIgnoreCase)
-                            || f.EndsWith(".laz", StringComparison.OrdinalIgnoreCase)
-                            || f.EndsWith(".xyz", StringComparison.OrdinalIgnoreCase)
-                            || f.EndsWith(".ptx", StringComparison.OrdinalIgnoreCase)
-                            || f.EndsWith("ply", StringComparison.OrdinalIgnoreCase));
+                .Where(FileTypeIsSupportedByPotree);
 
             foreach (var file in files)
             {
-                RunPotreeConverterProcess(file);
+                ConvertFileToPotree(file);
             }
 
             WriteLogSeparator();
             Console.WriteLine($"Finished processing folder {inputDirectory}");
         }
 
-        private void RunPotreeConverterProcess(string file)
+        public void ConvertFileToPotree(string file)
         {
             WriteLogSeparator();
             Console.WriteLine($"[Processing {file}]");
             Console.WriteLine();
 
+            if (!FileTypeIsSupportedByPotree(file))
+            {
+                Console.WriteLine($"File type is not supported by Potree: [{file}]");
+                return;
+            }
+
+            StartPotreeProcess(file);
+
+            Console.WriteLine($"[Done pocessing {file}]");
+        }
+
+        private bool FileTypeIsSupportedByPotree(string file)
+        {
+            return _potreeSupportedFileTypes.Any(file.ToLower().EndsWith);
+        }
+
+        private static void StartPotreeProcess(string file)
+        {
+            var currentDirectory = GetCurrentDirectory();
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = "CMD.exe",
                 Arguments =
-                    $"/c {_currentDirectory}\\PotreeConverter\\PotreeConverter.exe \"{file}\" -o \"{file}.potree\"",
+                    $"/c {currentDirectory}\\PotreeConverter\\PotreeConverter.exe \"{file}\" -o \"{file}.potree\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
@@ -62,8 +76,6 @@ namespace PotreeBatchConverter
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             process.WaitForExit();
-
-            Console.WriteLine($"[Done pocessing {file}]");
         }
 
         private static string GetCurrentDirectory()

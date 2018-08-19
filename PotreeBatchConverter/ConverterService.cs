@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -9,69 +10,77 @@ namespace PotreeBatchConverter
     public class ConverterService
     {
         private readonly string _logSeparator;
-        private readonly string[] _supportedFileTypes;
-        private readonly TargetSystem _targetSystem;
+        private readonly List<TargetSystem> _targetSystems;
 
-        public static ConverterService Create(TargetSystem targetSystem)
+        public static ConverterService Create(List<TargetSystem> targetSystem)
         {
             return new ConverterService(targetSystem);
         }
 
-        private ConverterService(TargetSystem targetSystem)
+        private ConverterService(List<TargetSystem> targetSystems)
         {
-            if (!Enum.IsDefined(typeof(TargetSystem), targetSystem))
-                throw new InvalidEnumArgumentException(nameof(targetSystem), (int) targetSystem, typeof(TargetSystem));
+            foreach (var system in targetSystems)
+            {
+                if (!Enum.IsDefined(typeof(TargetSystem), system))
+                    throw new InvalidEnumArgumentException(nameof(system), (int) system, typeof(TargetSystem));
+            }
 
-            _targetSystem = targetSystem;
+            _targetSystems = targetSystems;
             _logSeparator = GetLogSeparator();
-            _supportedFileTypes = GetSupportedFileTypes();
         }
 
-        public void ConvertFilesInDirectory(string inputDirectory)
+        public void ConvertFilesInDirectoryToTargetSystems(string inputDirectory)
+        {
+            foreach (var targetSystem in _targetSystems)
+                ConvertFilesInDirectoryToTargetSystem(targetSystem, inputDirectory);
+        }
+
+        public void ConvertFilesInDirectoryToTargetSystem(TargetSystem targetSystem, string inputDirectory)
         {
             Console.WriteLine(
-                $"[Reading all {_targetSystem.GetDescription()}-compatible files from {inputDirectory} and its subfolders...]");
+                $"[Reading all {targetSystem.GetDescription()}-compatible files from {inputDirectory} and its subfolders...]");
 
             var files = Directory.EnumerateFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
-                .Where(FileTypeIsSupportedByTargetSystem);
+                .Where(file => FileTypeIsSupportedByTargetSystem(targetSystem, file));
 
             foreach (var file in files)
             {
-                ConvertFileToTargetSystem(file);
+                ConvertFileToTargetSystem(targetSystem, file);
             }
 
             WriteLogSeparator();
             Console.WriteLine($"Finished processing folder {inputDirectory}");
         }
 
-        public void ConvertFileToTargetSystem(string file)
+        public void ConvertFileToTargetSystems(string file)
+        {
+            foreach (var targetSystem in _targetSystems)
+                ConvertFileToTargetSystem(targetSystem, file);
+        }
+
+        public void ConvertFileToTargetSystem(TargetSystem targetSystem, string file)
         {
             WriteLogSeparator();
             Console.WriteLine($"[Processing {file}]");
             Console.WriteLine();
 
-            if (!FileTypeIsSupportedByTargetSystem(file))
+            if (!FileTypeIsSupportedByTargetSystem(targetSystem, file))
             {
-                Console.WriteLine($"File type is not supported by {_targetSystem}: [{file}]");
+                Console.WriteLine($"File type is not supported by {_targetSystems}: [{file}]");
                 return;
             }
 
-            StartConversionProcess(file);
+            StartConversionProcess(targetSystem, file);
 
             Console.WriteLine($"[Done pocessing {file}]");
         }
 
-        private bool FileTypeIsSupportedByTargetSystem(string file)
-        {
-            return _supportedFileTypes.Any(file.ToLower().EndsWith);
-        }
-
-        private void StartConversionProcess(string filePath)
+        private static void StartConversionProcess(TargetSystem targetSystem, string filePath)
         {
             var startInfo = new ProcessStartInfo
             {
                 FileName = "CMD.exe",
-                Arguments = GetCommandForTargetSystem(filePath),
+                Arguments = GetCommandForTargetSystem(targetSystem, filePath),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
@@ -88,19 +97,18 @@ namespace PotreeBatchConverter
             process.WaitForExit();
         }
 
-        private string GetCommandForTargetSystem(string filePath)
+        private static string GetCommandForTargetSystem(TargetSystem targetSystem, string filePath)
         {
             var currentDirectory = GetCurrentDirectory();
 
             // ReSharper disable once SwitchStatementMissingSomeCases
-            switch (_targetSystem)
+            switch (targetSystem)
             {
                 case TargetSystem.Potree:
                     return
                         $"/c {currentDirectory}\\PotreeConverter\\PotreeConverter.exe \"{filePath}\" -o \"{filePath}.potree\"";
                 case TargetSystem.Nexus:
-                    var outputFilePath = GetOutputFilePathForNexus(filePath);
-                    return $"/c {currentDirectory}\\Nexus_4.2\\nxsbuild.exe \"{filePath}\" -o \"{outputFilePath}\"";
+                    return $"/c {currentDirectory}\\Nexus_4.2\\nxsbuild.exe \"{filePath}\" -o \"{filePath}.nxs\"";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -118,27 +126,22 @@ namespace PotreeBatchConverter
             return System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         }
 
-        private static string GetOutputFilePathForNexus(string filePath)
+        private bool FileTypeIsSupportedByTargetSystem(TargetSystem targetSystem, string file)
         {
-            var fileDirectory = Path.GetDirectoryName(filePath);
-            if (fileDirectory == null)
-                throw new ArgumentException($"Could not find directory for input file: [{filePath}]");
-            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
-            var outputFilePath = Path.Combine(fileDirectory, $"{fileNameWithoutExtension}.nxs");
-            return outputFilePath;
+            return GetSupportedFileTypes(targetSystem).Any(file.ToLower().EndsWith);
         }
 
-        private string[] GetSupportedFileTypes()
+        private IEnumerable<string> GetSupportedFileTypes(TargetSystem targetSystem)
         {
             // ReSharper disable once SwitchStatementMissingSomeCases
-            switch (_targetSystem)
+            switch (targetSystem)
             {
                 case TargetSystem.Potree:
                     return new[] {".las", ".laz", ".xyz", ".ptx", ".ply"};
                 case TargetSystem.Nexus:
                     return new[] {".ply"};
                 default:
-                    throw new ArgumentException($"No supported file types defined for target system: {_targetSystem}");
+                    throw new ArgumentException($"No supported file types defined for target system: {_targetSystems}");
             }
         }
 

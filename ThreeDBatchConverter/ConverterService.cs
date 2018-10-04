@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.IO.Compression;
 
 namespace ThreeDBatchConverter
 {
@@ -41,38 +42,40 @@ namespace ThreeDBatchConverter
                 $"[Reading all {targetSystem.GetDescription()}-compatible files from {inputDirectory} and its subfolders...]");
 
             var files = Directory.EnumerateFiles(inputDirectory, "*.*", SearchOption.AllDirectories)
-                .Where(file => FileTypeIsSupportedByTargetSystem(targetSystem, file));
+                .Where(filePath => FileTypeIsSupportedByTargetSystem(targetSystem, filePath));
 
-            foreach (var file in files)
+            foreach (var filePath in files)
             {
-                ConvertFileToTargetSystem(targetSystem, file);
+                ConvertFileToTargetSystem(targetSystem, filePath);
             }
 
             WriteLogSeparator();
             Console.WriteLine($"Finished processing folder {inputDirectory}");
         }
 
-        public void ConvertFileToTargetSystems(string file)
+        public void ConvertFileToTargetSystems(string filePath)
         {
             foreach (var targetSystem in _targetSystems)
-                ConvertFileToTargetSystem(targetSystem, file);
+                ConvertFileToTargetSystem(targetSystem, filePath);
         }
 
-        public void ConvertFileToTargetSystem(TargetSystem targetSystem, string file)
+        public void ConvertFileToTargetSystem(TargetSystem targetSystem, string filePath)
         {
             WriteLogSeparator();
-            Console.WriteLine($"[Processing {file}]");
+            Console.WriteLine($"[Processing {filePath}]");
             Console.WriteLine();
 
-            if (!FileTypeIsSupportedByTargetSystem(targetSystem, file))
+            if (!FileTypeIsSupportedByTargetSystem(targetSystem, filePath))
             {
-                Console.WriteLine($"File type is not supported for {targetSystem} conversion: [{file}]");
+                Console.WriteLine($"File type is not supported for {targetSystem} conversion: [{filePath}]");
                 return;
             }
 
-            StartConversionProcess(targetSystem, file);
+            StartConversionProcess(targetSystem, filePath);
 
-            Console.WriteLine($"[Done pocessing {file}]");
+            StartPostProcessing(targetSystem, filePath);
+
+            Console.WriteLine($"[Done pocessing {filePath}]");
         }
 
         private void StartConversionProcess(TargetSystem targetSystem, string filePath)
@@ -95,6 +98,21 @@ namespace ThreeDBatchConverter
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             process.WaitForExit();
+        }
+
+        private void StartPostProcessing(TargetSystem targetSystem, string inputFilePath)
+        {
+            // ReSharper disable once SwitchStatementMissingSomeCases
+            switch (targetSystem)
+            {
+                case TargetSystem.Potree:
+                    ZipOutputFiles(targetSystem, inputFilePath);
+                    break;
+                case TargetSystem.Nexus:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(targetSystem));
+            }
         }
 
         private string GetCommandForTargetSystem(TargetSystem targetSystem, string filePath)
@@ -127,9 +145,9 @@ namespace ThreeDBatchConverter
             return System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         }
 
-        private bool FileTypeIsSupportedByTargetSystem(TargetSystem targetSystem, string file)
+        private bool FileTypeIsSupportedByTargetSystem(TargetSystem targetSystem, string filePath)
         {
-            return GetSupportedFileTypes(targetSystem).Any(file.ToLower().EndsWith);
+            return GetSupportedFileTypes(targetSystem).Any(filePath.ToLower().EndsWith);
         }
 
         private IEnumerable<string> GetSupportedFileTypes(TargetSystem targetSystem)
@@ -142,7 +160,7 @@ namespace ThreeDBatchConverter
                 case TargetSystem.Nexus:
                     return new[] { ".ply" };
                 default:
-                    throw new ArgumentException($"No supported file types defined for target system: {_targetSystems}");
+                    throw new ArgumentException($"No supported originalFilePath types defined for target system: {_targetSystems}");
             }
         }
 
@@ -152,20 +170,43 @@ namespace ThreeDBatchConverter
             switch (targetSystem)
             {
                 case TargetSystem.Potree:
-                    return $"{inputPath}.potree";
+                    return $"{ResolvePathWithoutExtension(inputPath)}.potree";
                 case TargetSystem.Nexus:
-                    return ResolvePathForNewExtension(inputPath, "nxs");
+                    return $"{ResolvePathWithoutExtension(inputPath)}.nxs";
                 default:
-                    throw new ArgumentException($"No supported file types defined for target system: {_targetSystems}");
+                    throw new ArgumentException($"No supported originalFilePath types defined for target system: {_targetSystems}");
             }
         }
 
-        private static string ResolvePathForNewExtension(string inputPath, string extension)
+        private static string ResolvePathWithoutExtension(string inputPath)
         {
             var directory = Path.GetDirectoryName(inputPath) ?? throw new ArgumentNullException(nameof(inputPath));
-            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(inputPath);
-            var fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}";
-            return Path.Combine(directory, fileNameWithExtension);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(inputPath) ?? throw new ArgumentNullException(nameof(inputPath));
+            return Path.Combine(directory, fileNameWithoutExtension);
+        }
+
+        private void ZipOutputFiles(TargetSystem targetSystem, string originalFilePath)
+        {
+            var folderToZip = ResolveOutputPath(targetSystem, originalFilePath);
+
+            if (!Directory.Exists(folderToZip))
+            {
+                Console.WriteLine($"Output folder [{folderToZip}] does not exist. Something went wrong during conversion.");
+                return;
+            }
+
+            var zipfilePath = $"{folderToZip}.zip";
+
+            if (File.Exists(zipfilePath))
+            {
+                Console.WriteLine($"Zip file already exists: {zipfilePath}");
+                Console.WriteLine("Skipping...");
+                return;
+            }
+
+            ZipFile.CreateFromDirectory(folderToZip, zipfilePath, CompressionLevel.Optimal, false);
+
+            Console.WriteLine($"Created zipfile: {zipfilePath}");
         }
 
         private static string GetLogSeparator()

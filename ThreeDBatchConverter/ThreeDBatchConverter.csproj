@@ -34,6 +34,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConverterService.cs" />
@@ -43,6 +47,7 @@
     <Compile Include="TargetSystem.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\approximateTerrainHeights.json" />
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\IAU2006_XYS\IAU2006_XYS_0.json" />
     <None Include="PotreeConverter\resources\page_template\libs\Cesium\Assets\IAU2006_XYS\IAU2006_XYS_1.json" />

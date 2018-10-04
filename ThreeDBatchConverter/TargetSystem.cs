@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace PotreeBatchConverter
+namespace ThreeDBatchConverter
 {
     public enum TargetSystem
     {

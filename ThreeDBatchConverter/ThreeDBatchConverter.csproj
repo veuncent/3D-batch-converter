@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9C6439C2-CAB0-410B-B3E8-69BBA11AFE1F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>PotreeBatchConverter</RootNamespace>
-    <AssemblyName>PotreeBatchConverter</AssemblyName>
+    <RootNamespace>ThreeDBatchConverter</RootNamespace>
+    <AssemblyName>ThreeDBatchConverter</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

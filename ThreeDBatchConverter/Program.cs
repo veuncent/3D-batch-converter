@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace PotreeBatchConverter
+namespace ThreeDBatchConverter
 {
     internal class Program
     {

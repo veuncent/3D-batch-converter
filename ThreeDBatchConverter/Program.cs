@@ -80,7 +80,7 @@ namespace ThreeDBatchConverter
 
         private static string AskFileOrDirectory()
         {
-            Console.WriteLine("Do you want to process a single file or a directory?");
+            Console.WriteLine("Do you want to process a single file or all models in a directory?");
             string fileOrDirectory;
             var isValidAnswer = false;
 
@@ -103,6 +103,7 @@ namespace ThreeDBatchConverter
         private static string AskInputFile()
         {
             Console.WriteLine("Which file do you want to process?");
+            Console.WriteLine("Enter the complete file path, including the file extension (e.g. '.obj').");
 
             var isValidFile = false;
             var inputFile = "";

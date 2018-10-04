@@ -22,7 +22,7 @@ namespace ThreeDBatchConverter
             foreach (var system in targetSystems)
             {
                 if (!Enum.IsDefined(typeof(TargetSystem), system))
-                    throw new InvalidEnumArgumentException(nameof(system), (int) system, typeof(TargetSystem));
+                    throw new InvalidEnumArgumentException(nameof(system), (int)system, typeof(TargetSystem));
             }
 
             _targetSystems = targetSystems;
@@ -75,7 +75,7 @@ namespace ThreeDBatchConverter
             Console.WriteLine($"[Done pocessing {file}]");
         }
 
-        private static void StartConversionProcess(TargetSystem targetSystem, string filePath)
+        private void StartConversionProcess(TargetSystem targetSystem, string filePath)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -86,7 +86,7 @@ namespace ThreeDBatchConverter
                 RedirectStandardError = true
             };
 
-            var process = new Process {StartInfo = startInfo};
+            var process = new Process { StartInfo = startInfo };
 
             process.OutputDataReceived += (s, e) => Console.WriteLine(e.Data);
             process.ErrorDataReceived += (s, e) => Console.WriteLine(e.Data);
@@ -97,18 +97,19 @@ namespace ThreeDBatchConverter
             process.WaitForExit();
         }
 
-        private static string GetCommandForTargetSystem(TargetSystem targetSystem, string filePath)
+        private string GetCommandForTargetSystem(TargetSystem targetSystem, string filePath)
         {
             var currentDirectory = GetCurrentDirectory();
+            var outputPath = ResolveOutputPath(targetSystem, filePath);
 
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (targetSystem)
             {
                 case TargetSystem.Potree:
                     return
-                        $"/c {currentDirectory}\\PotreeConverter\\PotreeConverter.exe \"{filePath}\" -o \"{filePath}.potree\"";
+                        $"/c {currentDirectory}\\PotreeConverter\\PotreeConverter.exe \"{filePath}\" -o \"{outputPath}\"";
                 case TargetSystem.Nexus:
-                    return $"/c {currentDirectory}\\Nexus_4.2\\nxsbuild.exe \"{filePath}\" -o \"{filePath}.nxs\"";
+                    return $"/c {currentDirectory}\\Nexus_4.2\\nxsbuild.exe \"{filePath}\" -o \"{outputPath}\"";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -137,12 +138,34 @@ namespace ThreeDBatchConverter
             switch (targetSystem)
             {
                 case TargetSystem.Potree:
-                    return new[] {".las", ".laz", ".xyz", ".ptx", ".ply"};
+                    return new[] { ".las", ".laz", ".xyz", ".ptx", ".ply" };
                 case TargetSystem.Nexus:
-                    return new[] {".ply"};
+                    return new[] { ".ply" };
                 default:
                     throw new ArgumentException($"No supported file types defined for target system: {_targetSystems}");
             }
+        }
+
+        private string ResolveOutputPath(TargetSystem targetSystem, string inputPath)
+        {
+            // ReSharper disable once SwitchStatementMissingSomeCases
+            switch (targetSystem)
+            {
+                case TargetSystem.Potree:
+                    return $"{inputPath}.potree";
+                case TargetSystem.Nexus:
+                    return ResolvePathForNewExtension(inputPath, "nxs");
+                default:
+                    throw new ArgumentException($"No supported file types defined for target system: {_targetSystems}");
+            }
+        }
+
+        private static string ResolvePathForNewExtension(string inputPath, string extension)
+        {
+            var directory = Path.GetDirectoryName(inputPath) ?? throw new ArgumentNullException(nameof(inputPath));
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(inputPath);
+            var fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}";
+            return Path.Combine(directory, fileNameWithExtension);
         }
 
         private static string GetLogSeparator()

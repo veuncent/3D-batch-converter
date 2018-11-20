@@ -1,4 +1,4 @@
-# Potree Batch Converter
+# 3D Batch Converter
 
 This Windows console app converts 3D model files to several output systems.
 

@@ -158,7 +158,7 @@ namespace ThreeDBatchConverter
                 case TargetSystem.Potree:
                     return new[] { ".las", ".laz", ".xyz", ".ptx", ".ply" };
                 case TargetSystem.Nexus:
-                    return new[] { ".ply" };
+                    return new[] { ".ply", ".obj" };
                 default:
                     throw new ArgumentException($"No supported originalFilePath types defined for target system: {_targetSystems}");
             }
